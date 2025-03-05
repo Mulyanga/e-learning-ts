@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import { storage } from "./storage";
 import { User } from "./database";
 import { UserRole } from "@shared/schema";
+import { Types } from 'mongoose';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -16,8 +17,8 @@ export async function comparePasswords(password: string, hash: string): Promise<
   return bcrypt.compare(password, hash);
 }
 
-export function generateToken(userId: string, role: UserRole): string {
-  return jwt.sign({ userId, role }, JWT_SECRET, { expiresIn: '24h' });
+export function generateToken(userId: Types.ObjectId | string, role: UserRole): string {
+  return jwt.sign({ userId: userId.toString(), role }, JWT_SECRET, { expiresIn: '24h' });
 }
 
 export function authenticateToken(req: any, res: any, next: any) {
@@ -48,7 +49,7 @@ export function setupAuth(app: Express) {
   app.post("/api/register", async (req, res) => {
     try {
       const { username, email, password, role } = req.body;
-      
+
       const existingUser = await User.findOne({ $or: [{ username }, { email }] });
       if (existingUser) {
         return res.status(400).json({ message: "Username or email already exists" });
@@ -72,7 +73,7 @@ export function setupAuth(app: Express) {
   app.post("/api/login", async (req, res) => {
     try {
       const { username, password } = req.body;
-      
+
       const user = await User.findOne({ username });
       if (!user || !(await comparePasswords(password, user.password))) {
         return res.status(401).json({ message: "Invalid credentials" });

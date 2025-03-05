@@ -10,31 +10,31 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<any>;
   getUser(id: string): Promise<any>;
   getUserByUsername(username: string): Promise<any>;
-  
+
   // Course operations
   createCourse(course: InsertCourse): Promise<any>;
   getCourse(id: string): Promise<any>;
   getAllCourses(): Promise<any>;
   updateCourse(id: string, course: Partial<InsertCourse>): Promise<any>;
   deleteCourse(id: string): Promise<any>;
-  
+
   // Module operations
   createModule(module: InsertModule): Promise<any>;
   getModule(id: string): Promise<any>;
   updateModule(id: string, module: Partial<InsertModule>): Promise<any>;
   deleteModule(id: string): Promise<any>;
-  
+
   // Quiz operations
   createQuiz(quiz: InsertQuiz): Promise<any>;
   getQuiz(id: string): Promise<any>;
   updateQuiz(id: string, quiz: Partial<InsertQuiz>): Promise<any>;
   deleteQuiz(id: string): Promise<any>;
 
-  sessionStore: session.SessionStore;
+  sessionStore: session.Store;
 }
 
 export class MongoStorage implements IStorage {
-  sessionStore: session.SessionStore;
+  sessionStore: session.Store;
 
   constructor() {
     this.sessionStore = new MemoryStore({
