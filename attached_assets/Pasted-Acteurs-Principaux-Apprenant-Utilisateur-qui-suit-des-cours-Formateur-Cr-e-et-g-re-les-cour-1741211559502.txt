@@ -1,0 +1,127 @@
+Acteurs Principaux :
+Apprenant : Utilisateur qui suit des cours.
+Formateur : Crée et gère les cours.
+Administrateur : Gère la plateforme et les utilisateurs.
+Système de Paiement : Service externe pour la gestion des paiements.
+Cas d'Utilisation :
+1. Gestion des Utilisateurs
+S'inscrire
+Se connecter
+Gérer son profil
+Réinitialiser son mot de passe
+2. Gestion des Cours
+Parcourir le catalogue de cours
+Consulter le détail d'un cours
+Ajouter un cours (Formateur)
+Modifier/Supprimer un cours (Formateur)
+Suivre un cours (Apprenant)
+3. Personnalisation et IA
+Recevoir des recommandations de cours
+Interagir avec le chatbot d'assistance
+4. Monétisation et Paiement
+Acheter un cours à l’unité
+Souscrire à un abonnement
+Effectuer un paiement sécurisé (via le service externe)
+5. Évaluation et Certifications
+Passer un quiz d’évaluation
+Obtenir un certificat après validation
+6. Communauté et Interaction
+Participer à un forum de discussion
+Poser des questions et répondre
+7. Tableau de Bord et Suivi
+Consulter sa progression
+Voir ses statistiques d’apprentissage
+Relations entre Acteurs et Cas d'Utilisation
+L'Apprenant interagit avec la gestion des utilisateurs, les cours, l'IA, les paiements, les évaluations et la communauté.
+Le Formateur crée et gère des cours, interagit avec les évaluations et la communauté.
+L'Administrateur gère les utilisateurs et surveille les activités sur la plateforme.
+Le Système de Paiement intervient dans le processus de monétisation.
+
+# Diagramme de Classes - Plateforme E-Learning Intelligente
+Principales Classes et Relations :
+1. Utilisateur (Classe Parent - Héritage)
+id: ObjectId
+nom: String
+email: String
+motDePasse: String
+role: Enum (Apprenant, Formateur, Administrateur)
+dateInscription: Date
+méthodes:
+s'inscrire()
+seConnecter()
+modifierProfil()
+2. Apprenant (Hérite de Utilisateur)
+coursInscrits: [Cours]
+progression: Map<Cours, Float>
+méthodes :
+suivreCours()
+voirStatistiques()
+passerQuiz()
+3. Formateur (Hérite de Utilisateur)
+coursCréés: [Cours]
+méthodes :
+ajouterCours()
+modifierCours()
+supprimerCours()
+4. Cours
+id: ObjectId
+titre: String
+description: String
+formateur: Formateur
+contenu: [Module]
+prix: Float
+méthodes :
+ajouterContenu()
+modifierContenu()
+obtenirCours()
+5. Module
+id: ObjectId
+titre: String
+contenu: String
+ressources: [Fichier]
+méthodes :
+ajouterRessource()
+consulterContenu()
+6. Quiz
+id: ObjectId
+questions: [Question]
+cours: Cours
+méthodes :
+générerQuiz()
+corrigerQuiz()
+7. Question
+id: ObjectId
+intitulé: String
+choix: [String]
+réponseCorrecte: String
+8. Paiement
+id: ObjectId
+utilisateur: Utilisateur
+montant: Float
+moyenPaiement: Enum (Carte, PayPal)
+datePaiement: Date
+méthodes :
+effectuerPaiement()
+obtenirFacture()
+9. Forum
+id: ObjectId
+sujet: String
+messages: [Message]
+créateur: Utilisateur
+méthodes :
+ajouterMessage()
+supprimerMessage()
+10. Message
+id: ObjectId
+contenu: String
+auteur: Utilisateur
+datePublication: Date
+Relations entre Classes :
+Un Apprenant peut être inscrit à plusieurs Cours.
+Un Formateur peut créer plusieurs Cours.
+Un Cours est composé de plusieurs Modules.
+Un Cours peut avoir un Quiz.
+Un Apprenant peut passer plusieurs Quiz.
+Un Cours peut être acheté via un Paiement.
+Un Forum contient plusieurs Messages.
+Un Message appartient à un seul Auteur.
