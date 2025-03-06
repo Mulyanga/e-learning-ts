@@ -13,7 +13,9 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { insertUserSchema } from "@shared/schema";
+import { insertUserSchema, UserRole } from "@shared/schema";
+import { LoadingAnimation } from "@/components/ui/loading-animation";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
@@ -34,7 +36,7 @@ export default function AuthPage() {
               Welcome to our learning platform. Join us to access quality courses and enhance your skills.
             </p>
           </div>
-          
+
           <Tabs defaultValue="login" className="space-y-4">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Login</TabsTrigger>
@@ -71,8 +73,13 @@ export default function AuthPage() {
 
 function LoginForm() {
   const { loginMutation } = useAuth();
+  const { toast } = useToast();
   const form = useForm({
     resolver: zodResolver(insertUserSchema.pick({ username: true, password: true })),
+    defaultValues: {
+      username: "",
+      password: ""
+    }
   });
 
   return (
@@ -82,17 +89,52 @@ function LoginForm() {
         <CardDescription>Enter your credentials to access your account</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={form.handleSubmit((data) => loginMutation.mutate(data))} className="space-y-4">
+        <form 
+          onSubmit={form.handleSubmit((data) => {
+            loginMutation.mutate(
+              {
+                username: data.username,
+                password: data.password
+              },
+              {
+                onError: (error) => {
+                  toast({
+                    title: "Login failed",
+                    description: error.message,
+                    variant: "destructive"
+                  });
+                }
+              }
+            );
+          })} 
+          className="space-y-4"
+        >
           <div className="space-y-2">
             <Label htmlFor="username">Username</Label>
             <Input id="username" {...form.register("username")} />
+            {form.formState.errors.username && (
+              <p className="text-sm text-red-500">
+                {form.formState.errors.username.message}
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <Input type="password" id="password" {...form.register("password")} />
+            {form.formState.errors.password && (
+              <p className="text-sm text-red-500">
+                {form.formState.errors.password.message}
+              </p>
+            )}
           </div>
           <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
-            {loginMutation.isPending ? "Logging in..." : "Login"}
+            {loginMutation.isPending ? (
+              <div className="flex items-center justify-center">
+                <LoadingAnimation />
+              </div>
+            ) : (
+              "Login"
+            )}
           </Button>
         </form>
       </CardContent>
@@ -102,8 +144,15 @@ function LoginForm() {
 
 function RegisterForm() {
   const { registerMutation } = useAuth();
+  const { toast } = useToast();
   const form = useForm({
     resolver: zodResolver(insertUserSchema),
+    defaultValues: {
+      username: "",
+      email: "",
+      password: "",
+      role: UserRole.APPRENANT
+    }
   });
 
   return (
@@ -113,21 +162,69 @@ function RegisterForm() {
         <CardDescription>Create a new account to start learning</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={form.handleSubmit((data) => registerMutation.mutate(data))} className="space-y-4">
+        <form 
+          onSubmit={form.handleSubmit((data) => {
+            registerMutation.mutate(
+              {
+                username: data.username,
+                email: data.email,
+                password: data.password,
+                role: UserRole.APPRENANT
+              },
+              {
+                onError: (error) => {
+                  toast({
+                    title: "Registration failed",
+                    description: error.message,
+                    variant: "destructive"
+                  });
+                },
+                onSuccess: () => {
+                  toast({
+                    title: "Registration successful",
+                    description: "Your account has been created. You can now log in.",
+                  });
+                }
+              }
+            );
+          })} 
+          className="space-y-4"
+        >
           <div className="space-y-2">
             <Label htmlFor="reg-username">Username</Label>
             <Input id="reg-username" {...form.register("username")} />
+            {form.formState.errors.username && (
+              <p className="text-sm text-red-500">
+                {form.formState.errors.username.message}
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input type="email" id="email" {...form.register("email")} />
+            {form.formState.errors.email && (
+              <p className="text-sm text-red-500">
+                {form.formState.errors.email.message}
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="reg-password">Password</Label>
             <Input type="password" id="reg-password" {...form.register("password")} />
+            {form.formState.errors.password && (
+              <p className="text-sm text-red-500">
+                {form.formState.errors.password.message}
+              </p>
+            )}
           </div>
           <Button type="submit" className="w-full" disabled={registerMutation.isPending}>
-            {registerMutation.isPending ? "Creating account..." : "Register"}
+            {registerMutation.isPending ? (
+              <div className="flex items-center justify-center">
+                <LoadingAnimation />
+              </div>
+            ) : (
+              "Register"
+            )}
           </Button>
         </form>
       </CardContent>

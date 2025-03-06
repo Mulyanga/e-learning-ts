@@ -50,9 +50,20 @@ export function setupAuth(app: Express) {
     try {
       const { username, email, password, role } = req.body;
 
+      // Validate role
+      if (!Object.values(UserRole).includes(role)) {
+        return res.status(400).json({ 
+          message: "Invalid role. Must be one of: " + Object.values(UserRole).join(', '),
+          success: false
+        });
+      }
+
       const existingUser = await User.findOne({ $or: [{ username }, { email }] });
       if (existingUser) {
-        return res.status(400).json({ message: "Username or email already exists" });
+        return res.status(400).json({ 
+          message: "Username or email already exists",
+          success: false 
+        });
       }
 
       const hashedPassword = await hashPassword(password);
@@ -64,9 +75,22 @@ export function setupAuth(app: Express) {
       });
 
       const token = generateToken(user._id, user.role);
-      res.status(201).json({ user, token });
+      res.status(201).json({ 
+        user: {
+          id: user._id,
+          username: user.username,
+          email: user.email,
+          role: user.role
+        }, 
+        token,
+        success: true 
+      });
     } catch (error) {
-      res.status(500).json({ message: "Error creating user" });
+      console.error('Registration error:', error);
+      res.status(500).json({ 
+        message: "Error creating user", 
+        success: false 
+      });
     }
   });
 
@@ -76,13 +100,29 @@ export function setupAuth(app: Express) {
 
       const user = await User.findOne({ username });
       if (!user || !(await comparePasswords(password, user.password))) {
-        return res.status(401).json({ message: "Invalid credentials" });
+        return res.status(401).json({ 
+          message: "Invalid credentials",
+          success: false 
+        });
       }
 
       const token = generateToken(user._id, user.role);
-      res.json({ user, token });
+      res.json({ 
+        user: {
+          id: user._id,
+          username: user.username,
+          email: user.email,
+          role: user.role
+        },
+        token,
+        success: true 
+      });
     } catch (error) {
-      res.status(500).json({ message: "Error logging in" });
+      console.error('Login error:', error);
+      res.status(500).json({ 
+        message: "Error logging in",
+        success: false 
+      });
     }
   });
 
@@ -94,11 +134,18 @@ export function setupAuth(app: Express) {
     try {
       const user = await User.findById(req.user.userId).select('-password');
       if (!user) {
-        return res.status(404).json({ message: "User not found" });
+        return res.status(404).json({ 
+          message: "User not found",
+          success: false 
+        });
       }
       res.json(user);
     } catch (error) {
-      res.status(500).json({ message: "Error fetching user" });
+      console.error('Fetch user error:', error);
+      res.status(500).json({ 
+        message: "Error fetching user",
+        success: false 
+      });
     }
   });
 }
